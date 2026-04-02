@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convite Especial - Fundo do Mar</title>
+    <style>
+        :root { --tempo-cena: 6s; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #000; }
+
+        /* Container Principal */
+        #convite-container { position: relative; width: 100vw; height: 100vh; }
+
+        /* Estilo das Cenas */
+        .cena {
+            position: absolute; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 1.5s ease-in-out;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+        }
+        .cena.ativa { opacity: 1; z-index: 10; }
+
+        /* Vídeo de Fundo (Cenário) */
+        .bg-video {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; object-fit: cover; z-index: -1;
+        }
+
+        /* Efeito Parallax nos GIFs */
+        .personagem-gif {
+            position: absolute;
+            transform: translateZ(0);
+            animation: flutuar 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes flutuar {
+            from { transform: translateY(0px) rotate(-2deg); }
+            to { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        /* Textos */
+        .texto-cena {
+            color: white; font-size: 2.5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            z-index: 20; padding: 20px; max-width: 80%;
+        }
+
+        /* Botão de Som */
+        #controle-som {
+            position: fixed; top: 20px; left: 20px; z-index: 100;
+            background: rgba(255,255,255,0.7); border: none; border-radius: 50%;
+            width: 50px; height: 50px; cursor: pointer; font-size: 20px;
+        }
+
+        /* Capa Interativa */
+        #capa { 
+            background: url('capa.jpg') no-repeat center center; background-size: cover;
+            cursor: pointer; z-index: 1000; opacity: 1;
+        }
+
+        /* Botões Finais (Cena 08) */
+        .botoes-finais a {
+            display: inline-block; padding: 15px 25px; margin: 10px;
+            background: #ff69b4; color: white; text-decoration: none;
+            border-radius: 30px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="controle-som">🔇</button>
+    <audio id="musica-fundo" loop src="audio-convite.mp3"></audio>
+
+    <div id="convite-container">
+        <div id="capa" class="cena ativa" onclick="iniciarConvite()">
+            <h1 class="texto-cena">Clique para abrir o Convite Especial 🌊</h1>
+        </div>
+
+        </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DAS CENAS ---
+        // Aqui você adiciona os nomes dos arquivos e textos
+        const dadosCenas = [
+            { texto: "Junte-se a nós em uma aventura!", video: "cena1.mp4", gifs: ["polvo.gif"], posGifs: ["top:20%; left:10%"] },
+            { texto: "Sabrina faz 1 aninho!", video: "cena2.mp4", gifs: ["peixe.gif"], posGifs: ["bottom:10%; right:15%"] },
+            { texto: "Venha celebrar com a gente!", video: "cena3.mp4", gifs: ["baleia.gif"], posGifs: ["center"] },
+            // Adicione as cenas 04 a 07 aqui...
+            { 
+                texto: "Esperamos por você!", 
+                video: "final.mp4", 
+                gifs: [], 
+                links: [
+                    { label: "Confirmar Presença", url: "https://wa.me/seunumeroaqui" },
+                    { label: "Ver no Maps", url: "https://goo.gl/maps/exemplo" }
+                ] 
+            }
+        ];
+
+        const container = document.getElementById('convite-container');
+        const audio = document.getElementById('musica-fundo');
+        const btnSom = document.getElementById('controle-som');
+        let cenaAtual = 0;
+
+        // Gerar HTML das cenas automaticamente
+        dadosCenas.forEach((dados, index) => {
+            const divCena = document.createElement('div');
+            divCena.className = 'cena';
+            divCena.id = `cena-${index + 1}`;
+
+            let htmlGifs = '';
+            dados.gifs.forEach((gif, i) => {
+                htmlGifs += `<img src="${gif}" class="personagem-gif" style="${dados.posGifs[i]}">`;
+            });
+
+            let htmlBotoes = '';
+            if(dados.links) {
+                htmlBotoes = `<div class="botoes-finais">` + 
+                    dados.links.map(l => `<a href="${l.url}" target="_blank">${l.label}</a>`).join('') + 
+                    `</div>`;
+            }
+
+            divCena.innerHTML = `
+                <video class="bg-video" autoplay muted loop>
+                    <source src="${dados.video}" type="video/mp4">
+                </video>
+                <div class="texto-cena">${dados.texto} ${htmlBotoes}</div>
+                ${htmlGifs}
+            `;
+            container.appendChild(divCena);
+        });
+
+        function iniciarConvite() {
+            document.getElementById('capa').classList.remove('ativa');
+            audio.play();
+            btnSom.innerText = "🔊";
+            proximaCena();
+        }
+
+        function proximaCena() {
+            if (cenaAtual < dadosCenas.length) {
+                const todas = document.querySelectorAll('.cena');
+                todas.forEach(c => c.classList.remove('ativa'));
+                
+                cenaAtual++;
+                document.getElementById(`cena-${cenaAtual}`).classList.add('ativa');
+
+                // Troca de cena a cada 6 segundos
+                if (cenaAtual < dadosCenas.length) {
+                    setTimeout(proximaCena, 6000);
+                }
+            }
+        }
+
+        // Controle de play/pause manual
+        btnSom.onclick = () => {
+            if (audio.paused) { audio.play(); btnSom.innerText = "🔊"; }
+            else { audio.pause(); btnSom.innerText = "🔇"; }
+        };
+    </script>
+</body>
+</html>
