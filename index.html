@@ -1,282 +1,729 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convite Especial - Fundo do Mar</title>
-    <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: #000;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Convite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Nunito',sans-serif; }
 
-        #convite-container {
-            position: relative; width: 100vw; height: 100vh; overflow: hidden;
-        }
+    /* ═══════════════════════════════════════════════
+       CONVITE
+    ═══════════════════════════════════════════════ */
+    #tela-convite { position:fixed; inset:0; display:none; }
 
-        /* ── CENAS ── */
-        .cena {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            visibility: hidden; overflow: hidden;
-            will-change: transform;
-        }
-        .cena.ativa { visibility: visible; z-index: 10; }
+    /* Fundo: vídeo único contínuo */
+    #fundo-video {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; z-index:0; pointer-events:none;
+    }
 
-        /* BG com margem lateral para o parallax não mostrar borda */
-        .bg-video {
-            position: absolute;
-            top: 0; left: -15%;
-            width: 130%; height: 100%;
-            object-fit: cover; z-index: 0;
-            will-change: transform;
-        }
+    /* Capa */
+    #capa {
+      position:absolute; inset:0; z-index:100;
+      background:url('capa.jpg') center/cover no-repeat;
+      cursor:pointer; transition:opacity .8s ease;
+    }
+    #capa.fechando { opacity:0; pointer-events:none; }
 
-        /* ── GIFs: fade-in após a transição ── */
-        .personagem-gif {
-            position: absolute; z-index: 5;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-            animation: flutuar 4s ease-in-out infinite alternate;
-            will-change: transform, opacity;
-        }
-        .personagem-gif.visivel { opacity: 1; }
-        .personagem-gif:nth-child(even) { animation-duration: 6s; animation-delay: 1s; }
-        @keyframes flutuar {
-            from { transform: translateY(0px) rotate(-3deg); }
-            to   { transform: translateY(-28px) rotate(3deg); }
-        }
+    /* Camada de elementos (gifs/pngs) */
+    #camada-elementos { position:absolute; inset:0; z-index:10; pointer-events:none; }
 
-        /* ── HOTSPOTS ── */
-        .botoes-finais {
-            position: absolute; z-index: 10;
-            bottom: 10%; left: 50%; transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-        }
-        .botoes-finais a {
-            display: flex; align-items: center; justify-content: center;
-            width: 220px; height: 55px;
-            background: transparent; color: transparent;
-            text-decoration: none; border-radius: 10px;
-            border: 2px solid transparent;
-        }
-        /* Ative debug-mode no <body> para ver os botões */
-        .debug-mode .botoes-finais a {
-            background: rgba(255,105,180,0.4);
-            border: 2px dashed #ff69b4;
-            color: white; font-size: 13px; font-weight: bold;
-        }
+    /* Cada elemento posicionado */
+    .elem-wrapper {
+      position:absolute;
+      transform:translate(-50%, -50%);
+      display:none;
+      pointer-events:none;
+    }
+    .elem-wrapper img {
+      display:block; width:100%;
+      animation:flutuar 4s ease-in-out infinite;
+    }
+    .elem-wrapper:nth-child(even) img { animation-duration:5.5s; animation-delay:.8s; }
+    .elem-wrapper:nth-child(3n)   img { animation-duration:6.5s; animation-delay:1.5s; }
+    @keyframes flutuar {
+      0%,100% { transform:translateY(0) rotate(-2deg); }
+      50%      { transform:translateY(-14px) rotate(2deg); }
+    }
 
-        /* ── CAPA ── */
-        #capa {
-            position: absolute; inset: 0; z-index: 1000;
-            background: url('capa.jpg') no-repeat center center / cover;
-            cursor: pointer; visibility: visible;
-            transition: opacity 0.8s ease;
-        }
-        #capa.fechando { opacity: 0; pointer-events: none; }
+    /* Botões hotspot (cena final) */
+    #camada-botoes {
+      position:absolute; inset:0; z-index:20;
+      pointer-events:none;
+    }
+    .hotspot-btn {
+      position:absolute;
+      transform:translate(-50%, -50%);
+      display:none;
+      background:transparent; border:none;
+      cursor:pointer; pointer-events:all;
+      text-decoration:none;
+      /* debug: torna visível */
+    }
+    .debug .hotspot-btn {
+      background:rgba(255,80,150,.45);
+      border:2px dashed #ff5096;
+      color:#fff; font-size:13px; font-weight:700;
+      border-radius:10px; padding:6px 14px;
+      display:flex !important; align-items:center; justify-content:center;
+    }
 
-        /* ── BOTÃO SOM ── */
-        #controle-som {
-            position: fixed; top: 20px; left: 20px; z-index: 1100;
-            background: rgba(255,255,255,0.5); border: none; border-radius: 50%;
-            width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem;
-        }
-    </style>
+    /* Botão de som */
+    #btn-som {
+      position:fixed; bottom:calc(24px + env(safe-area-inset-bottom,0px));
+      left:calc(18px + env(safe-area-inset-left,0px));
+      z-index:200; width:44px; height:44px; border-radius:50%;
+      background:rgba(0,0,0,.5); border:1.5px solid rgba(255,255,255,.3);
+      color:#fff; display:none; align-items:center; justify-content:center;
+      cursor:pointer; backdrop-filter:blur(8px); font-size:1.1rem;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    /* ═══════════════════════════════════════════════
+       PAINEL DE MAPEAMENTO
+    ═══════════════════════════════════════════════ */
+    #tela-mapa {
+      position:fixed; inset:0; display:none;
+      background:#0f0f1a; color:#e0e0ff;
+      overflow-y:auto; padding:24px 20px;
+      padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+    }
+
+    .mapa-titulo {
+      font-size:1.3rem; font-weight:700; color:#a78bfa;
+      margin-bottom:4px;
+    }
+    .mapa-sub {
+      font-size:.8rem; color:rgba(255,255,255,.4);
+      margin-bottom:20px; line-height:1.5;
+    }
+
+    .mapa-bloco {
+      background:rgba(255,255,255,.05); border-radius:14px;
+      padding:16px; margin-bottom:16px;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .mapa-bloco label {
+      display:block; font-size:.78rem; color:#a78bfa;
+      margin-bottom:8px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    }
+
+    /* Upload */
+    #area-upload {
+      border:2px dashed rgba(167,139,250,.4); border-radius:12px;
+      padding:28px 16px; text-align:center; cursor:pointer;
+      transition:border-color .3s, background .3s;
+    }
+    #area-upload:hover { border-color:#a78bfa; background:rgba(167,139,250,.08); }
+    #area-upload input { display:none; }
+    #area-upload .upload-icon { font-size:2rem; margin-bottom:8px; }
+    #area-upload p { font-size:.85rem; color:rgba(255,255,255,.5); }
+
+    /* Preview da imagem com marcadores */
+    #preview-container {
+      position:relative; display:none;
+      border-radius:12px; overflow:hidden; margin-top:14px;
+    }
+    #img-preview { display:block; width:100%; height:auto; }
+    #overlay-marcadores { position:absolute; inset:0; }
+    .marcador {
+      position:absolute; transform:translate(-50%, -50%);
+      background:rgba(167,139,250,.85); border-radius:50%;
+      width:14px; height:14px; border:2px solid #fff;
+      cursor:pointer;
+    }
+    .marcador-label {
+      position:absolute; top:16px; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,.8); color:#fff; font-size:.65rem;
+      white-space:nowrap; padding:2px 6px; border-radius:6px;
+      pointer-events:none;
+    }
+
+    /* Input de elementos */
+    #input-elementos {
+      width:100%; background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.15); border-radius:10px;
+      padding:12px 14px; color:#e0e0ff; font-size:.85rem;
+      outline:none; resize:vertical; min-height:72px;
+      font-family:'Nunito',sans-serif;
+    }
+    #input-elementos::placeholder { color:rgba(255,255,255,.25); }
+    #input-elementos:focus { border-color:#a78bfa; }
+
+    /* Botão analisar */
+    #btn-analisar {
+      width:100%; padding:14px; border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#a78bfa);
+      border:none; color:#fff; font-size:.95rem; font-weight:700;
+      cursor:pointer; margin-bottom:16px; font-family:'Nunito',sans-serif;
+      transition:opacity .2s; -webkit-tap-highlight-color:transparent;
+    }
+    #btn-analisar:disabled { opacity:.5; cursor:not-allowed; }
+    #btn-analisar:active:not(:disabled) { opacity:.85; }
+
+    /* Status / loading */
+    #status-mapa {
+      text-align:center; font-size:.82rem; color:#a78bfa;
+      min-height:24px; margin-bottom:12px;
+    }
+
+    /* JSON output */
+    #bloco-json { display:none; }
+    #json-output {
+      background:rgba(0,0,0,.4); border-radius:10px;
+      padding:14px; font-size:.72rem; color:#86efac;
+      white-space:pre-wrap; word-break:break-all;
+      max-height:260px; overflow-y:auto;
+      border:1px solid rgba(134,239,172,.2);
+      font-family:'Courier New',monospace;
+    }
+    #btn-copiar {
+      margin-top:12px; width:100%; padding:12px;
+      border-radius:10px; background:rgba(134,239,172,.15);
+      border:1px solid rgba(134,239,172,.3); color:#86efac;
+      font-size:.85rem; font-weight:700; cursor:pointer;
+      font-family:'Nunito',sans-serif; transition:background .2s;
+    }
+    #btn-copiar:active { background:rgba(134,239,172,.3); }
+    #msg-copiado {
+      text-align:center; font-size:.78rem; color:#86efac;
+      margin-top:8px; min-height:20px;
+    }
+
+    /* Instrução final */
+    .instrucao {
+      background:rgba(167,139,250,.08); border-radius:12px;
+      padding:14px 16px; font-size:.78rem; color:rgba(255,255,255,.55);
+      line-height:1.7; border-left:3px solid #a78bfa;
+    }
+    .instrucao strong { color:#a78bfa; }
+  </style>
 </head>
 <body>
 
-    <button id="controle-som">🔇</button>
-    <audio id="musica-fundo" loop src="audio.mp3"></audio>
+<!-- ═══════════════════════════════════════════════════════
+     TELA DO CONVITE
+═══════════════════════════════════════════════════════ -->
+<div id="tela-convite">
 
-    <div id="convite-container">
-        <div id="capa"></div>
+  <video id="fundo-video" src="fundo.mp4" muted playsinline loop preload="auto"></video>
+  <audio  id="audio-bg"   src="audio.mp3" loop preload="auto"></audio>
+
+  <div id="capa"></div>
+
+  <div id="camada-elementos"></div>
+  <div id="camada-botoes"></div>
+
+  <button id="btn-som">🔇</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAINEL DE MAPEAMENTO  (acesse via ?mapa na URL)
+═══════════════════════════════════════════════════════ -->
+<div id="tela-mapa">
+  <p class="mapa-titulo">🗺️ Painel de Mapeamento</p>
+  <p class="mapa-sub">Suba a imagem de referência da cena. O Claude vai identificar automaticamente a posição de cada personagem, elemento e botão.</p>
+
+  <div class="mapa-bloco">
+    <label>📸 Imagem de referência da cena</label>
+    <div id="area-upload">
+      <input type="file" id="input-img" accept="image/*">
+      <div class="upload-icon">🖼️</div>
+      <p>Toque aqui para escolher a imagem</p>
     </div>
+    <div id="preview-container">
+      <img id="img-preview" alt="Referência">
+      <div id="overlay-marcadores"></div>
+    </div>
+  </div>
 
-    <script>
-    /* ════════════════════════════════════════════════════════════
-       ✏️  CONFIGURAÇÃO — edite apenas aqui
-    ════════════════════════════════════════════════════════════ */
-    const TEMPO_CENA_MS = 6000;  // duração de cada cena em ms
-    const TRANSICAO_MS  = 900;   // duração do parallax em ms
-    const PARALLAX_BG   = 0.25;  // 0=bg anda junto | 1=bg fica parado
+  <div class="mapa-bloco">
+    <label>🐠 Nomes dos arquivos desta cena (um por linha)</label>
+    <textarea id="input-elementos" placeholder="baleia.gif&#10;caranguejo.gif&#10;tartaruga.gif&#10;aguaviva.gif&#10;algasverde.png&#10;algasrosa.png&#10;botao-confirmar (hotspot)&#10;botao-mapa (hotspot)"></textarea>
+  </div>
 
-    const dadosCenas = [
-        {
-            video: "cena1.mp4",
-            gifs: [{ src: "polvo.gif", estilo: "top:20%; left:10%; width:18vw;" }]
-        },
-        {
-            video: "cena2.mp4",
-            gifs: [{ src: "peixe.gif", estilo: "bottom:15%; right:10%; width:15vw;" }]
-        },
-        {
-            video: "cena3.mp4",
-            gifs: [{ src: "baleia.gif", estilo: "top:40%; left:30%; width:22vw;" }]
-        },
-        {
-            video: "final.mp4",
-            gifs: [],
-            links: [
-                { label: "CONFIRMAR", url: "https://wa.me/5571993233142" },
-                { label: "MAPA",      url: "https://maps.google.com"     }
-            ]
-        }
-    ];
-    /* ════════════════════════════════════════════════════════════ */
+  <div id="status-mapa"></div>
+  <button id="btn-analisar">🔍 Analisar posições com IA</button>
 
-    const container = document.getElementById('convite-container');
-    const audio     = document.getElementById('musica-fundo');
-    const btnSom    = document.getElementById('controle-som');
-    const capa      = document.getElementById('capa');
-    let proximaIdx  = 1;
-    let emTransicao = false;
-    let timer       = null;
+  <div id="bloco-json" class="mapa-bloco">
+    <label>✅ JSON gerado — cole no CONFIG do convite</label>
+    <pre id="json-output"></pre>
+    <button id="btn-copiar">📋 Copiar JSON</button>
+    <p id="msg-copiado"></p>
+  </div>
 
-    /* ── Constrói cenas ──────────────────────────────────────── */
-    const elementos = dadosCenas.map((dados, i) => {
-        const div = document.createElement('div');
-        div.className = 'cena';
+  <div class="instrucao">
+    <strong>Como usar:</strong><br>
+    1. Suba o print/foto de referência da cena<br>
+    2. Liste os nomes dos arquivos que você vai usar<br>
+    3. Clique em <strong>Analisar</strong> — o Claude detecta as posições<br>
+    4. Copie o JSON e cole na seção <strong>CENAS</strong> do convite<br>
+    5. Para hotspots (botões), escreva <strong>(hotspot)</strong> após o nome
+  </div>
+</div>
 
-        const htmlBotoes = dados.links
-            ? `<div class="botoes-finais">` +
-              dados.links.map(l =>
-                `<a href="${l.url}" target="_blank">${l.label}</a>`
-              ).join('') + `</div>`
-            : '';
 
-        div.innerHTML = `
-            <video class="bg-video" loop muted playsinline>
-                <source src="${dados.video}" type="video/mp4">
-            </video>
-            ${dados.gifs.map(g =>
-                `<img src="${g.src}" class="personagem-gif" style="${g.estilo}">`
-            ).join('')}
-            ${htmlBotoes}
-        `;
-        container.appendChild(div);
-        return div;
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ✏️  CONFIG DO CONVITE — edite aqui
+   
+   de: direção de entrada do elemento
+       'left' | 'right' | 'top' | 'bottom'
+   
+   x, y: posição em % (0%=esquerda/topo, 100%=direita/fundo)
+   w:    largura do elemento (vw ou %)
+   
+   Para hotspots (cena final), use o campo "botoes":
+     url: link de destino
+     x,y: posição do botão clicável (em %)
+     w,h: tamanho da área clicável
+═══════════════════════════════════════════════════════════════ */
+const CENAS = [
+  // ─── CENA 1 ───────────────────────────────────────────────
+  {
+    elementos: [
+      { src: "baleia.gif",     x: "65%", y: "10%", w: "22vw", de: "top"    },
+      { src: "aguaviva.gif",   x: "18%", y: "40%", w: "18vw", de: "left"   },
+      { src: "algasverde.png", x: "88%", y: "65%", w: "16vw", de: "right"  },
+      { src: "algasrosa.png",  x: "8%",  y: "70%", w: "16vw", de: "left"   },
+    ]
+  },
+  // ─── CENA 2 ───────────────────────────────────────────────
+  {
+    elementos: [
+      { src: "peixe.gif",      x: "60%", y: "70%", w: "14vw", de: "right"  },
+      { src: "caranguejo.gif", x: "20%", y: "85%", w: "16vw", de: "bottom" },
+      { src: "tartaruga.gif",  x: "15%", y: "78%", w: "18vw", de: "left"   },
+      { src: "algasverde.png", x: "82%", y: "60%", w: "16vw", de: "right"  },
+    ]
+  },
+  // ─── CENA 3 ───────────────────────────────────────────────
+  {
+    elementos: [
+      { src: "baleia.gif",    x: "70%", y: "12%", w: "22vw", de: "right"  },
+      { src: "peixe.gif",     x: "30%", y: "55%", w: "14vw", de: "left"   },
+      { src: "aguaviva.gif",  x: "80%", y: "55%", w: "16vw", de: "right"  },
+      { src: "algasrosa.png", x: "10%", y: "75%", w: "18vw", de: "bottom" },
+    ]
+  },
+  // ─── CENA FINAL (hotspots) ────────────────────────────────
+  {
+    final: true,
+    elementos: [
+      { src: "baleia.gif",     x: "65%", y: "8%",  w: "22vw", de: "top"    },
+      { src: "aguaviva.gif",   x: "18%", y: "42%", w: "18vw", de: "left"   },
+      { src: "peixe.gif",      x: "55%", y: "72%", w: "14vw", de: "right"  },
+      { src: "tartaruga.gif",  x: "15%", y: "80%", w: "18vw", de: "left"   },
+      { src: "caranguejo.gif", x: "22%", y: "90%", w: "14vw", de: "bottom" },
+      { src: "algasrosa.png",  x: "10%", y: "62%", w: "18vw", de: "left"   },
+      { src: "algasverde.png", x: "86%", y: "58%", w: "16vw", de: "right"  },
+    ],
+    botoes: [
+      { label: "Confirmar", url: "https://wa.me/5571999999999", x: "50%", y: "52%", w: "65%", h: "55px" },
+      { label: "Ver mapa",  url: "https://maps.google.com",    x: "50%", y: "66%", w: "65%", h: "55px" },
+    ]
+  }
+];
+
+const TEMPO_CENA_MS = 6000; // duração de cada cena em ms
+const ENTRADA_MS    = 700;  // duração da animação de entrada
+const SAIDA_MS      = 650;  // duração da animação de saída (zoom)
+const STAGGER_MS    = 140;  // delay entre entrada de cada elemento
+
+/* ═══════════════════════════════════════════════════════════════
+   DETECÇÃO DE MODO
+═══════════════════════════════════════════════════════════════ */
+const isMapa = location.search.includes('mapa') || location.hash === '#mapa';
+
+if (isMapa) {
+  document.getElementById('tela-mapa').style.display = 'block';
+  initMapa();
+} else {
+  document.getElementById('tela-convite').style.display = 'block';
+  initConvite();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONVITE
+═══════════════════════════════════════════════════════════════ */
+function initConvite() {
+  const capa          = document.getElementById('capa');
+  const audio         = document.getElementById('audio-bg');
+  const fundoVideo    = document.getElementById('fundo-video');
+  const camadaElem    = document.getElementById('camada-elementos');
+  const camadaBotoes  = document.getElementById('camada-botoes');
+  const btnSom        = document.getElementById('btn-som');
+
+  let cenaIdx     = -1;
+  let emAnimacao  = false;
+  let timer       = null;
+
+  // Pré-carrega fundo (mudo, invisível)
+  fundoVideo.load();
+
+  /* ── Easing ── */
+  function ease(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
+
+  /* ── Cria wrapper de elemento ── */
+  function criarElem(cfg) {
+    const wrap = document.createElement('div');
+    wrap.className  = 'elem-wrapper';
+    wrap.style.left = cfg.x;
+    wrap.style.top  = cfg.y;
+    wrap.style.width = cfg.w;
+    wrap.dataset.de  = cfg.de || 'left';
+
+    const img = document.createElement('img');
+    img.src = cfg.src;
+    img.draggable = false;
+    wrap.appendChild(img);
+    return wrap;
+  }
+
+  /* ── Animação de ENTRADA (desliza da lateral) ── */
+  function animarEntrada(wrap) {
+    const de = wrap.dataset.de || 'left';
+    const dist = 110; // % da viewport
+    let ox = 0, oy = 0;
+    if (de === 'left')   ox = -dist;
+    else if (de === 'right')  ox = dist;
+    else if (de === 'top')    oy = -dist;
+    else if (de === 'bottom') oy = dist;
+
+    wrap.style.display  = 'block';
+    wrap.style.opacity  = '0';
+    wrap.style.transform = `translate(calc(-50% + ${ox}vw), calc(-50% + ${oy}vh))`;
+    // Para a animação flutuante durante a entrada
+    wrap.querySelector('img').style.animationPlayState = 'paused';
+
+    const inicio = performance.now();
+    function frame(agora) {
+      const t    = Math.min((agora - inicio) / ENTRADA_MS, 1);
+      const prog = ease(t);
+      const cx   = ox * (1 - prog);
+      const cy   = oy * (1 - prog);
+      wrap.style.transform = `translate(calc(-50% + ${cx}vw), calc(-50% + ${cy}vh))`;
+      wrap.style.opacity   = String(prog);
+      if (t < 1) requestAnimationFrame(frame);
+      else {
+        wrap.style.transform = 'translate(-50%, -50%)';
+        wrap.style.opacity   = '1';
+        wrap.querySelector('img').style.animationPlayState = 'running';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── Animação de SAÍDA (zoom cresce até sumir) ── */
+  function animarSaida(wrap, onFim) {
+    wrap.querySelector('img').style.animationPlayState = 'paused';
+    const inicio = performance.now();
+    function frame(agora) {
+      const t    = Math.min((agora - inicio) / SAIDA_MS, 1);
+      const prog = ease(t);
+      const sc   = 1 + prog * 2.8;
+      wrap.style.transform = `translate(-50%, -50%) scale(${sc})`;
+      wrap.style.opacity   = String(1 - prog);
+      if (t < 1) requestAnimationFrame(frame);
+      else {
+        wrap.style.display = 'none';
+        wrap.style.transform = 'translate(-50%, -50%)';
+        wrap.style.opacity   = '1';
+        wrap.querySelector('img').style.animationPlayState = 'running';
+        if (onFim) onFim();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── Cria botões hotspot ── */
+  function criarBotoes(botoes) {
+    camadaBotoes.innerHTML = '';
+    botoes.forEach(cfg => {
+      const a = document.createElement('a');
+      a.className   = 'hotspot-btn';
+      a.href        = cfg.url;
+      a.target      = '_blank';
+      a.textContent = cfg.label;
+      a.style.left   = cfg.x;
+      a.style.top    = cfg.y;
+      a.style.width  = cfg.w;
+      a.style.height = cfg.h;
+      camadaBotoes.appendChild(a);
+      // Fade-in suave
+      setTimeout(() => { a.style.display = 'flex'; }, 400);
+    });
+  }
+
+  /* ── Mostrar cena ── */
+  function mostrarCena(idx) {
+    const cena = CENAS[idx];
+    cenaIdx    = idx;
+
+    // Limpa elementos antigos
+    camadaElem.innerHTML   = '';
+    camadaBotoes.innerHTML = '';
+
+    // Cria e anima elementos com stagger
+    cena.elementos.forEach((cfg, i) => {
+      const wrap = criarElem(cfg);
+      camadaElem.appendChild(wrap);
+      setTimeout(() => animarEntrada(wrap), i * STAGGER_MS);
     });
 
-    /* ── Easing ──────────────────────────────────────────────── */
-    function ease(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
+    // Botões se for cena final
+    if (cena.final && cena.botoes) criarBotoes(cena.botoes);
 
-    /* ── Parallax via RAF ────────────────────────────────────── */
-    function transicionar(elSaindo, elEntrando, onFim) {
-        const bgSaindo   = elSaindo  ? elSaindo.querySelector('.bg-video')  : null;
-        const bgEntrando = elEntrando.querySelector('.bg-video');
-        const gifsEntr   = elEntrando.querySelectorAll('.personagem-gif');
-
-        // Esconde GIFs da cena entrando (vão aparecer depois)
-        gifsEntr.forEach(g => g.classList.remove('visivel'));
-
-        // Posiciona cena entrando fora da tela à direita
-        elEntrando.style.transform  = 'translateX(100%)';
-        elEntrando.style.visibility = 'visible';
-        if (bgEntrando) bgEntrando.style.transform = `translateX(${PARALLAX_BG * 100 - 15}%)`;
-
-        const videoEntrando = elEntrando.querySelector('video');
-        if (videoEntrando) videoEntrando.play().catch(() => {});
-
-        const inicio = performance.now();
-
-        function frame(agora) {
-            const t    = Math.min((agora - inicio) / TRANSICAO_MS, 1);
-            const prog = ease(t);
-
-            // Cena saindo → esquerda (100%)
-            if (elSaindo) {
-                elSaindo.style.transform = `translateX(${-prog * 100}%)`;
-                // BG saindo: move menos (parallax)
-                if (bgSaindo)
-                    bgSaindo.style.transform = `translateX(${prog * (PARALLAX_BG * 100) - 15}%)`;
-            }
-
-            // Cena entrando: direita → centro
-            elEntrando.style.transform = `translateX(${(1 - prog) * 100}%)`;
-            // BG entrando: move menos (parallax)
-            if (bgEntrando)
-                bgEntrando.style.transform = `translateX(${-(1 - prog) * (PARALLAX_BG * 100) - 15}%)`;
-
-            if (t < 1) {
-                requestAnimationFrame(frame);
-            } else {
-                // Limpeza da cena saindo
-                if (elSaindo) {
-                    elSaindo.style.visibility = 'hidden';
-                    elSaindo.style.transform  = '';
-                    elSaindo.classList.remove('ativa');
-                    const vS = elSaindo.querySelector('video');
-                    if (vS) { vS.pause(); vS.currentTime = 0; }
-                    elSaindo.querySelectorAll('.personagem-gif')
-                            .forEach(g => g.classList.remove('visivel'));
-                }
-
-                // Finaliza cena entrando
-                elEntrando.style.transform = '';
-                if (bgEntrando) bgEntrando.style.transform = 'translateX(-15%)';
-                elEntrando.classList.add('ativa');
-
-                // GIFs surgem suavemente após a transição
-                setTimeout(() => {
-                    gifsEntr.forEach(g => g.classList.add('visivel'));
-                }, 150);
-
-                if (onFim) onFim();
-            }
-        }
-        requestAnimationFrame(frame);
+    // Agenda próxima cena
+    clearTimeout(timer);
+    if (!cena.final) {
+      timer = setTimeout(() => trocarCena(idx + 1), TEMPO_CENA_MS);
     }
+    emAnimacao = false;
+  }
 
-    /* ── Avança cenas ────────────────────────────────────────── */
-    function irParaCena(index) {
-        if (emTransicao) return;
-        emTransicao = true;
-        clearTimeout(timer);
+  /* ── Troca de cena: saída em zoom → mostrar próxima ── */
+  function trocarCena(idx) {
+    if (emAnimacao) return;
+    emAnimacao = true;
+    clearTimeout(timer);
 
-        const elSaindo   = container.querySelector('.cena.ativa');
-        const elEntrando = elementos[index];
+    const wraps = camadaElem.querySelectorAll('.elem-wrapper');
+    if (wraps.length === 0) { mostrarCena(idx); return; }
 
-        transicionar(elSaindo, elEntrando, () => {
-            emTransicao = false;
-            proximaIdx  = index + 1;
-            if (index < dadosCenas.length - 1) {
-                timer = setTimeout(() => irParaCena(index + 1), TEMPO_CENA_MS);
-            }
+    let done = 0;
+    wraps.forEach((w, i) => {
+      // Stagger na saída também
+      setTimeout(() => {
+        animarSaida(w, () => {
+          done++;
+          if (done === wraps.length) mostrarCena(idx);
         });
+      }, i * 80);
+    });
+  }
+
+  /* ── Clique na capa ── */
+  capa.addEventListener('click', () => {
+    capa.classList.add('fechando');
+    fundoVideo.play().catch(() => {});
+    audio.volume = 0;
+    audio.play().catch(() => {});
+    // Fade-in do áudio
+    let vol = 0;
+    const ivl = setInterval(() => {
+      vol = Math.min(vol + 0.04, 0.85);
+      audio.volume = vol;
+      if (vol >= 0.85) clearInterval(ivl);
+    }, 80);
+
+    btnSom.style.display = 'flex';
+    setTimeout(() => {
+      capa.style.display = 'none';
+      mostrarCena(0);
+    }, 800);
+  });
+
+  /* ── Botão de som ── */
+  let mutado = false;
+  btnSom.addEventListener('click', () => {
+    mutado = !mutado;
+    audio.muted  = mutado;
+    btnSom.textContent = mutado ? '🔇' : '🔊';
+  });
+  btnSom.textContent = '🔊';
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PAINEL DE MAPEAMENTO
+═══════════════════════════════════════════════════════════════ */
+function initMapa() {
+  const areaUpload    = document.getElementById('area-upload');
+  const inputImg      = document.getElementById('input-img');
+  const imgPreview    = document.getElementById('img-preview');
+  const previewCont   = document.getElementById('preview-container');
+  const overlayMarcad = document.getElementById('overlay-marcadores');
+  const inputElem     = document.getElementById('input-elementos');
+  const btnAnalisar   = document.getElementById('btn-analisar');
+  const statusMapa    = document.getElementById('status-mapa');
+  const blocoJson     = document.getElementById('bloco-json');
+  const jsonOutput    = document.getElementById('json-output');
+  const btnCopiar     = document.getElementById('btn-copiar');
+  const msgCopiado    = document.getElementById('msg-copiado');
+
+  let base64Atual = null;
+  let mediaTypeAtual = 'image/jpeg';
+
+  /* ── Upload de imagem ── */
+  areaUpload.addEventListener('click', () => inputImg.click());
+  areaUpload.addEventListener('dragover', e => e.preventDefault());
+  areaUpload.addEventListener('drop', e => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) carregarImagem(f);
+  });
+  inputImg.addEventListener('change', () => {
+    if (inputImg.files[0]) carregarImagem(inputImg.files[0]);
+  });
+
+  function carregarImagem(file) {
+    mediaTypeAtual = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onload = e => {
+      base64Atual = e.target.result.split(',')[1];
+      imgPreview.src = e.target.result;
+      previewCont.style.display = 'block';
+      overlayMarcad.innerHTML   = '';
+      blocoJson.style.display   = 'none';
+      statusMapa.textContent    = '✅ Imagem carregada. Agora clique em Analisar.';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ── Analisar com Claude API ── */
+  btnAnalisar.addEventListener('click', async () => {
+    if (!base64Atual) {
+      statusMapa.textContent = '⚠️ Suba uma imagem primeiro.';
+      return;
     }
 
-    /* ── Clique na capa ──────────────────────────────────────── */
-    capa.addEventListener('click', () => {
-        capa.classList.add('fechando');
-        audio.play().catch(() => {});
-        btnSom.innerText = '🔊';
+    const listaNomes = inputElem.value.trim();
+    if (!listaNomes) {
+      statusMapa.textContent = '⚠️ Liste os nomes dos arquivos.';
+      return;
+    }
 
-        setTimeout(() => {
-            capa.style.display = 'none';
+    btnAnalisar.disabled   = true;
+    statusMapa.textContent = '🤖 Claude está analisando a imagem...';
+    overlayMarcad.innerHTML = '';
+    blocoJson.style.display = 'none';
 
-            // Primeira cena: aparece diretamente
-            const primeira = elementos[0];
-            primeira.style.visibility = 'visible';
-            primeira.classList.add('ativa');
-            const v = primeira.querySelector('video');
-            if (v) v.play().catch(() => {});
-            setTimeout(() => {
-                primeira.querySelectorAll('.personagem-gif')
-                        .forEach(g => g.classList.add('visivel'));
-            }, 400);
+    const prompt = `Você é um assistente de posicionamento para convites digitais.
 
-            proximaIdx = 1;
-            timer = setTimeout(() => irParaCena(1), TEMPO_CENA_MS);
-        }, 800);
+Analise esta imagem de referência. O usuário quer posicionar estes arquivos/elementos:
+${listaNomes}
+
+Para CADA elemento listado, identifique onde ele aparece na imagem (ou onde seria o local mais adequado) e retorne as coordenadas em porcentagem relativa à imagem:
+- x: 0% = borda esquerda, 100% = borda direita (centro do elemento)
+- y: 0% = topo, 100% = fundo (centro do elemento)
+- w: largura sugerida em vw (ex: "18vw")
+- de: direção de entrada sugerida: "left", "right", "top" ou "bottom"
+- tipo: "elemento" para gifs/pngs decorativos, ou "hotspot" para botões clicáveis
+- Se for hotspot, adicione: h: altura sugerida (ex: "52px")
+
+Retorne SOMENTE JSON válido, sem markdown, sem explicação:
+{
+  "elementos": [
+    { "nome": "arquivo.gif", "x": "XX%", "y": "YY%", "w": "18vw", "de": "left", "tipo": "elemento" },
+    { "nome": "botao.png",   "x": "50%", "y": "55%", "w": "65%",  "h": "52px", "de": "bottom", "tipo": "hotspot", "label": "Texto do botão", "url": "https://" }
+  ]
+}`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaTypeAtual, data: base64Atual } },
+              { type: 'text',  text: prompt }
+            ]
+          }]
+        })
+      });
+
+      if (!resp.ok) throw new Error(`API ${resp.status}`);
+      const data = await resp.json();
+      const texto = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+
+      // Extrai JSON da resposta
+      const jsonStr = texto.replace(/```json|```/g, '').trim();
+      const resultado = JSON.parse(jsonStr);
+
+      mostrarMarcadores(resultado.elementos);
+      gerarJSON(resultado.elementos);
+      statusMapa.textContent = `✅ ${resultado.elementos.length} elemento(s) mapeado(s)!`;
+
+    } catch (err) {
+      statusMapa.textContent = '❌ Erro: ' + err.message;
+      console.error(err);
+    } finally {
+      btnAnalisar.disabled = false;
+    }
+  });
+
+  /* ── Mostra marcadores sobre a imagem ── */
+  function mostrarMarcadores(elementos) {
+    overlayMarcad.innerHTML = '';
+    const rect = imgPreview.getBoundingClientRect();
+
+    elementos.forEach((el, i) => {
+      const dot = document.createElement('div');
+      dot.className    = 'marcador';
+      dot.style.left   = el.x;
+      dot.style.top    = el.y;
+      dot.style.background = el.tipo === 'hotspot' ? '#f472b6' : '#a78bfa';
+      dot.title        = el.nome;
+
+      const label = document.createElement('div');
+      label.className  = 'marcador-label';
+      label.textContent = el.nome;
+      dot.appendChild(label);
+
+      overlayMarcad.appendChild(dot);
     });
+  }
 
-    /* ── Som ─────────────────────────────────────────────────── */
-    btnSom.addEventListener('click', () => {
-        if (audio.paused) { audio.play(); btnSom.innerText = '🔊'; }
-        else              { audio.pause(); btnSom.innerText = '🔇'; }
+  /* ── Gera JSON formatado para copiar ── */
+  function gerarJSON(elementos) {
+    const elems  = elementos.filter(e => e.tipo !== 'hotspot');
+    const botoes = elementos.filter(e => e.tipo === 'hotspot');
+
+    const obj = {
+      elementos: elems.map(e => ({
+        src: e.nome, x: e.x, y: e.y, w: e.w, de: e.de
+      }))
+    };
+
+    if (botoes.length > 0) {
+      obj.final  = true;
+      obj.botoes = botoes.map(b => ({
+        label: b.label || b.nome.replace(/\.(png|gif|jpg)/i, ''),
+        url:   b.url || 'https://',
+        x: b.x, y: b.y, w: b.w, h: b.h || '52px'
+      }));
+    }
+
+    jsonOutput.textContent = JSON.stringify(obj, null, 2);
+    blocoJson.style.display = 'block';
+  }
+
+  /* ── Copiar JSON ── */
+  btnCopiar.addEventListener('click', () => {
+    navigator.clipboard.writeText(jsonOutput.textContent).then(() => {
+      msgCopiado.textContent = '✅ Copiado! Cole na seção CENAS do convite.';
+      setTimeout(() => msgCopiado.textContent = '', 3000);
+    }).catch(() => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = jsonOutput.textContent;
+      document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      msgCopiado.textContent = '✅ Copiado!';
+      setTimeout(() => msgCopiado.textContent = '', 3000);
     });
-    </script>
+  });
+}
+</script>
 </body>
 </html>
