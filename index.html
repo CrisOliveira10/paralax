@@ -9,18 +9,13 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Nunito',sans-serif; }
 
-    /* ═══════════════════════════════════════════════
-       CONVITE
-    ═══════════════════════════════════════════════ */
     #tela-convite { position:fixed; inset:0; display:none; }
 
-    /* Fundo: vídeo único contínuo */
     #fundo-video {
       position:absolute; inset:0; width:100%; height:100%;
       object-fit:cover; z-index:0; pointer-events:none;
     }
 
-    /* Capa */
     #capa {
       position:absolute; inset:0; z-index:100;
       background:url('capa.jpg') center/cover no-repeat;
@@ -28,10 +23,8 @@
     }
     #capa.fechando { opacity:0; pointer-events:none; }
 
-    /* Camada de elementos (gifs/pngs) */
     #camada-elementos { position:absolute; inset:0; z-index:10; pointer-events:none; }
 
-    /* Cada elemento posicionado */
     .elem-wrapper {
       position:absolute;
       transform:translate(-50%, -50%);
@@ -49,7 +42,6 @@
       50%      { transform:translateY(-14px) rotate(2deg); }
     }
 
-    /* Botões hotspot (cena final) */
     #camada-botoes {
       position:absolute; inset:0; z-index:20;
       pointer-events:none;
@@ -61,7 +53,6 @@
       background:transparent; border:none;
       cursor:pointer; pointer-events:all;
       text-decoration:none;
-      /* debug: torna visível */
     }
     .debug .hotspot-btn {
       background:rgba(255,80,150,.45);
@@ -71,7 +62,6 @@
       display:flex !important; align-items:center; justify-content:center;
     }
 
-    /* Botão de som */
     #btn-som {
       position:fixed; bottom:calc(24px + env(safe-area-inset-bottom,0px));
       left:calc(18px + env(safe-area-inset-left,0px));
@@ -82,25 +72,15 @@
       -webkit-tap-highlight-color:transparent;
     }
 
-    /* ═══════════════════════════════════════════════
-       PAINEL DE MAPEAMENTO
-    ═══════════════════════════════════════════════ */
+    /* ═══ PAINEL DE MAPEAMENTO ═══ */
     #tela-mapa {
       position:fixed; inset:0; display:none;
       background:#0f0f1a; color:#e0e0ff;
       overflow-y:auto; padding:24px 20px;
       padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
     }
-
-    .mapa-titulo {
-      font-size:1.3rem; font-weight:700; color:#a78bfa;
-      margin-bottom:4px;
-    }
-    .mapa-sub {
-      font-size:.8rem; color:rgba(255,255,255,.4);
-      margin-bottom:20px; line-height:1.5;
-    }
-
+    .mapa-titulo { font-size:1.3rem; font-weight:700; color:#a78bfa; margin-bottom:4px; }
+    .mapa-sub { font-size:.8rem; color:rgba(255,255,255,.4); margin-bottom:20px; line-height:1.5; }
     .mapa-bloco {
       background:rgba(255,255,255,.05); border-radius:14px;
       padding:16px; margin-bottom:16px;
@@ -110,8 +90,6 @@
       display:block; font-size:.78rem; color:#a78bfa;
       margin-bottom:8px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
     }
-
-    /* Upload */
     #area-upload {
       border:2px dashed rgba(167,139,250,.4); border-radius:12px;
       padding:28px 16px; text-align:center; cursor:pointer;
@@ -121,8 +99,6 @@
     #area-upload input { display:none; }
     #area-upload .upload-icon { font-size:2rem; margin-bottom:8px; }
     #area-upload p { font-size:.85rem; color:rgba(255,255,255,.5); }
-
-    /* Preview da imagem com marcadores */
     #preview-container {
       position:relative; display:none;
       border-radius:12px; overflow:hidden; margin-top:14px;
@@ -132,17 +108,13 @@
     .marcador {
       position:absolute; transform:translate(-50%, -50%);
       background:rgba(167,139,250,.85); border-radius:50%;
-      width:14px; height:14px; border:2px solid #fff;
-      cursor:pointer;
+      width:14px; height:14px; border:2px solid #fff; cursor:pointer;
     }
     .marcador-label {
       position:absolute; top:16px; left:50%; transform:translateX(-50%);
       background:rgba(0,0,0,.8); color:#fff; font-size:.65rem;
-      white-space:nowrap; padding:2px 6px; border-radius:6px;
-      pointer-events:none;
+      white-space:nowrap; padding:2px 6px; border-radius:6px; pointer-events:none;
     }
-
-    /* Input de elementos */
     #input-elementos {
       width:100%; background:rgba(255,255,255,.07);
       border:1px solid rgba(255,255,255,.15); border-radius:10px;
@@ -152,8 +124,6 @@
     }
     #input-elementos::placeholder { color:rgba(255,255,255,.25); }
     #input-elementos:focus { border-color:#a78bfa; }
-
-    /* Botão analisar */
     #btn-analisar {
       width:100%; padding:14px; border-radius:12px;
       background:linear-gradient(135deg,#7c3aed,#a78bfa);
@@ -163,14 +133,7 @@
     }
     #btn-analisar:disabled { opacity:.5; cursor:not-allowed; }
     #btn-analisar:active:not(:disabled) { opacity:.85; }
-
-    /* Status / loading */
-    #status-mapa {
-      text-align:center; font-size:.82rem; color:#a78bfa;
-      min-height:24px; margin-bottom:12px;
-    }
-
-    /* JSON output */
+    #status-mapa { text-align:center; font-size:.82rem; color:#a78bfa; min-height:24px; margin-bottom:12px; }
     #bloco-json { display:none; }
     #json-output {
       background:rgba(0,0,0,.4); border-radius:10px;
@@ -188,12 +151,7 @@
       font-family:'Nunito',sans-serif; transition:background .2s;
     }
     #btn-copiar:active { background:rgba(134,239,172,.3); }
-    #msg-copiado {
-      text-align:center; font-size:.78rem; color:#86efac;
-      margin-top:8px; min-height:20px;
-    }
-
-    /* Instrução final */
+    #msg-copiado { text-align:center; font-size:.78rem; color:#86efac; margin-top:8px; min-height:20px; }
     .instrucao {
       background:rgba(167,139,250,.08); border-radius:12px;
       padding:14px 16px; font-size:.78rem; color:rgba(255,255,255,.55);
@@ -204,29 +162,20 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
-     TELA DO CONVITE
-═══════════════════════════════════════════════════════ -->
+<!-- CONVITE -->
 <div id="tela-convite">
-
   <video id="fundo-video" src="fundo.mp4" muted playsinline loop preload="auto"></video>
   <audio  id="audio-bg"   src="audio.mp3" loop preload="auto"></audio>
-
   <div id="capa"></div>
-
   <div id="camada-elementos"></div>
   <div id="camada-botoes"></div>
-
   <button id="btn-som">🔇</button>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════
-     PAINEL DE MAPEAMENTO  (acesse via ?mapa na URL)
-═══════════════════════════════════════════════════════ -->
+<!-- PAINEL DE MAPEAMENTO -->
 <div id="tela-mapa">
   <p class="mapa-titulo">🗺️ Painel de Mapeamento</p>
-  <p class="mapa-sub">Suba a imagem de referência da cena. O Claude vai identificar automaticamente a posição de cada personagem, elemento e botão.</p>
+  <p class="mapa-sub">Suba o print de referência da cena. O Claude identifica automaticamente a posição de cada personagem, elemento e botão.</p>
 
   <div class="mapa-bloco">
     <label>📸 Imagem de referência da cena</label>
@@ -243,7 +192,7 @@
 
   <div class="mapa-bloco">
     <label>🐠 Nomes dos arquivos desta cena (um por linha)</label>
-    <textarea id="input-elementos" placeholder="baleia.gif&#10;caranguejo.gif&#10;tartaruga.gif&#10;aguaviva.gif&#10;algasverde.png&#10;algasrosa.png&#10;botao-confirmar (hotspot)&#10;botao-mapa (hotspot)"></textarea>
+    <textarea id="input-elementos" placeholder="baleia.gif&#10;caranguejo.gif&#10;cavalomarinho.gif&#10;polvo.gif&#10;peixe.gif&#10;botao-confirmar (hotspot)&#10;botao-mapa (hotspot)"></textarea>
   </div>
 
   <div id="status-mapa"></div>
@@ -258,69 +207,55 @@
 
   <div class="instrucao">
     <strong>Como usar:</strong><br>
-    1. Suba o print/foto de referência da cena<br>
-    2. Liste os nomes dos arquivos que você vai usar<br>
-    3. Clique em <strong>Analisar</strong> — o Claude detecta as posições<br>
+    1. Tire um print do frame do vídeo da cena<br>
+    2. Suba o print aqui e liste os nomes dos arquivos<br>
+    3. Clique em <strong>Analisar</strong> — Claude detecta as posições<br>
     4. Copie o JSON e cole na seção <strong>CENAS</strong> do convite<br>
-    5. Para hotspots (botões), escreva <strong>(hotspot)</strong> após o nome
+    5. Para botões clicáveis, escreva <strong>(hotspot)</strong> após o nome
   </div>
 </div>
 
-
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   ✏️  CONFIG DO CONVITE — edite aqui
-   
-   de: direção de entrada do elemento
-       'left' | 'right' | 'top' | 'bottom'
-   
-   x, y: posição em % (0%=esquerda/topo, 100%=direita/fundo)
-   w:    largura do elemento (vw ou %)
-   
-   Para hotspots (cena final), use o campo "botoes":
-     url: link de destino
-     x,y: posição do botão clicável (em %)
-     w,h: tamanho da área clicável
+   ✏️  CONFIG — edite apenas aqui
 ═══════════════════════════════════════════════════════════════ */
 const CENAS = [
   // ─── CENA 1 ───────────────────────────────────────────────
   {
     elementos: [
-      { src: "baleia.gif",     x: "65%", y: "10%", w: "22vw", de: "top"    },
-      { src: "aguaviva.gif",   x: "18%", y: "40%", w: "18vw", de: "left"   },
-      { src: "algasverde.png", x: "88%", y: "65%", w: "16vw", de: "right"  },
-      { src: "algasrosa.png",  x: "8%",  y: "70%", w: "16vw", de: "left"   },
+      { src: "baleia.gif",       x: "65%", y: "10%", w: "22vw", de: "top"    },
+      { src: "cavalomarinho.gif",x: "18%", y: "40%", w: "14vw", de: "left"   },
+      { src: "polvo.gif",        x: "82%", y: "62%", w: "16vw", de: "right"  },
+      { src: "peixe.gif",        x: "40%", y: "75%", w: "14vw", de: "bottom" },
     ]
   },
   // ─── CENA 2 ───────────────────────────────────────────────
   {
     elementos: [
-      { src: "peixe.gif",      x: "60%", y: "70%", w: "14vw", de: "right"  },
-      { src: "caranguejo.gif", x: "20%", y: "85%", w: "16vw", de: "bottom" },
-      { src: "tartaruga.gif",  x: "15%", y: "78%", w: "18vw", de: "left"   },
-      { src: "algasverde.png", x: "82%", y: "60%", w: "16vw", de: "right"  },
+      { src: "peixe.gif",        x: "60%", y: "70%", w: "14vw", de: "right"  },
+      { src: "caranguejo.gif",   x: "20%", y: "85%", w: "16vw", de: "bottom" },
+      { src: "cavalomarinho2.gif",x: "15%", y: "35%", w: "14vw", de: "left"  },
+      { src: "baleia.gif",       x: "75%", y: "15%", w: "22vw", de: "top"    },
     ]
   },
   // ─── CENA 3 ───────────────────────────────────────────────
   {
     elementos: [
-      { src: "baleia.gif",    x: "70%", y: "12%", w: "22vw", de: "right"  },
-      { src: "peixe.gif",     x: "30%", y: "55%", w: "14vw", de: "left"   },
-      { src: "aguaviva.gif",  x: "80%", y: "55%", w: "16vw", de: "right"  },
-      { src: "algasrosa.png", x: "10%", y: "75%", w: "18vw", de: "bottom" },
+      { src: "polvo.gif",        x: "70%", y: "55%", w: "18vw", de: "right"  },
+      { src: "peixe.gif",        x: "30%", y: "30%", w: "14vw", de: "left"   },
+      { src: "cavalomarinho.gif",x: "80%", y: "30%", w: "14vw", de: "right"  },
+      { src: "caranguejo.gif",   x: "20%", y: "80%", w: "16vw", de: "bottom" },
     ]
   },
   // ─── CENA FINAL (hotspots) ────────────────────────────────
   {
     final: true,
     elementos: [
-      { src: "baleia.gif",     x: "65%", y: "8%",  w: "22vw", de: "top"    },
-      { src: "aguaviva.gif",   x: "18%", y: "42%", w: "18vw", de: "left"   },
-      { src: "peixe.gif",      x: "55%", y: "72%", w: "14vw", de: "right"  },
-      { src: "tartaruga.gif",  x: "15%", y: "80%", w: "18vw", de: "left"   },
-      { src: "caranguejo.gif", x: "22%", y: "90%", w: "14vw", de: "bottom" },
-      { src: "algasrosa.png",  x: "10%", y: "62%", w: "18vw", de: "left"   },
-      { src: "algasverde.png", x: "86%", y: "58%", w: "16vw", de: "right"  },
+      { src: "baleia.gif",       x: "65%", y: "8%",  w: "22vw", de: "top"    },
+      { src: "cavalomarinho.gif",x: "18%", y: "42%", w: "14vw", de: "left"   },
+      { src: "peixe.gif",        x: "55%", y: "72%", w: "14vw", de: "right"  },
+      { src: "caranguejo.gif",   x: "22%", y: "88%", w: "16vw", de: "bottom" },
+      { src: "polvo.gif",        x: "82%", y: "58%", w: "16vw", de: "right"  },
     ],
     botoes: [
       { label: "Confirmar", url: "https://wa.me/5571999999999", x: "50%", y: "52%", w: "65%", h: "55px" },
@@ -329,16 +264,13 @@ const CENAS = [
   }
 ];
 
-const TEMPO_CENA_MS = 6000; // duração de cada cena em ms
-const ENTRADA_MS    = 700;  // duração da animação de entrada
-const SAIDA_MS      = 650;  // duração da animação de saída (zoom)
-const STAGGER_MS    = 140;  // delay entre entrada de cada elemento
+const TEMPO_CENA_MS = 6000;
+const ENTRADA_MS    = 700;
+const SAIDA_MS      = 650;
+const STAGGER_MS    = 140;
 
-/* ═══════════════════════════════════════════════════════════════
-   DETECÇÃO DE MODO
-═══════════════════════════════════════════════════════════════ */
+/* ── Modo ── */
 const isMapa = location.search.includes('mapa') || location.hash === '#mapa';
-
 if (isMapa) {
   document.getElementById('tela-mapa').style.display = 'block';
   initMapa();
@@ -351,62 +283,88 @@ if (isMapa) {
    CONVITE
 ═══════════════════════════════════════════════════════════════ */
 function initConvite() {
-  const capa          = document.getElementById('capa');
-  const audio         = document.getElementById('audio-bg');
-  const fundoVideo    = document.getElementById('fundo-video');
-  const camadaElem    = document.getElementById('camada-elementos');
-  const camadaBotoes  = document.getElementById('camada-botoes');
-  const btnSom        = document.getElementById('btn-som');
+  const capa         = document.getElementById('capa');
+  const audio        = document.getElementById('audio-bg');
+  const fundoVideo   = document.getElementById('fundo-video');
+  const camadaElem   = document.getElementById('camada-elementos');
+  const camadaBotoes = document.getElementById('camada-botoes');
+  const btnSom       = document.getElementById('btn-som');
 
-  let cenaIdx     = -1;
-  let emAnimacao  = false;
-  let timer       = null;
+  let emAnimacao = false;
+  let timer      = null;
+  let mutado     = false;
 
-  // Pré-carrega fundo (mudo, invisível)
   fundoVideo.load();
+
+  /* ── Áudio: loop robusto ── */
+  function iniciarAudio() {
+    audio.loop         = true;
+    audio.currentTime  = 0;
+    audio.volume       = 0;
+
+    audio.play().catch(() => {});
+
+    // Fade-in suave
+    let vol = 0;
+    const ivl = setInterval(() => {
+      vol = Math.min(vol + 0.04, 0.85);
+      audio.volume = vol;
+      if (vol >= 0.85) clearInterval(ivl);
+    }, 80);
+
+    // Segurança: reinicia se parar inesperadamente
+    audio.addEventListener('ended', () => {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    });
+
+    // Segurança: impede pause acidental do sistema (iOS)
+    audio.addEventListener('pause', () => {
+      if (!mutado) {
+        setTimeout(() => {
+          if (audio.paused && !mutado) audio.play().catch(() => {});
+        }, 300);
+      }
+    });
+  }
 
   /* ── Easing ── */
   function ease(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
 
-  /* ── Cria wrapper de elemento ── */
+  /* ── Cria wrapper ── */
   function criarElem(cfg) {
-    const wrap = document.createElement('div');
-    wrap.className  = 'elem-wrapper';
-    wrap.style.left = cfg.x;
-    wrap.style.top  = cfg.y;
+    const wrap       = document.createElement('div');
+    wrap.className   = 'elem-wrapper';
+    wrap.style.left  = cfg.x;
+    wrap.style.top   = cfg.y;
     wrap.style.width = cfg.w;
     wrap.dataset.de  = cfg.de || 'left';
-
-    const img = document.createElement('img');
-    img.src = cfg.src;
-    img.draggable = false;
+    const img        = document.createElement('img');
+    img.src          = cfg.src;
+    img.draggable    = false;
     wrap.appendChild(img);
     return wrap;
   }
 
-  /* ── Animação de ENTRADA (desliza da lateral) ── */
+  /* ── Entrada: desliza da lateral ── */
   function animarEntrada(wrap) {
-    const de = wrap.dataset.de || 'left';
-    const dist = 110; // % da viewport
+    const de   = wrap.dataset.de || 'left';
     let ox = 0, oy = 0;
-    if (de === 'left')   ox = -dist;
-    else if (de === 'right')  ox = dist;
-    else if (de === 'top')    oy = -dist;
-    else if (de === 'bottom') oy = dist;
+    if      (de === 'left')   ox = -110;
+    else if (de === 'right')  ox =  110;
+    else if (de === 'top')    oy = -110;
+    else if (de === 'bottom') oy =  110;
 
-    wrap.style.display  = 'block';
-    wrap.style.opacity  = '0';
+    wrap.style.display   = 'block';
+    wrap.style.opacity   = '0';
     wrap.style.transform = `translate(calc(-50% + ${ox}vw), calc(-50% + ${oy}vh))`;
-    // Para a animação flutuante durante a entrada
     wrap.querySelector('img').style.animationPlayState = 'paused';
 
     const inicio = performance.now();
     function frame(agora) {
       const t    = Math.min((agora - inicio) / ENTRADA_MS, 1);
       const prog = ease(t);
-      const cx   = ox * (1 - prog);
-      const cy   = oy * (1 - prog);
-      wrap.style.transform = `translate(calc(-50% + ${cx}vw), calc(-50% + ${cy}vh))`;
+      wrap.style.transform = `translate(calc(-50% + ${ox*(1-prog)}vw), calc(-50% + ${oy*(1-prog)}vh))`;
       wrap.style.opacity   = String(prog);
       if (t < 1) requestAnimationFrame(frame);
       else {
@@ -418,19 +376,18 @@ function initConvite() {
     requestAnimationFrame(frame);
   }
 
-  /* ── Animação de SAÍDA (zoom cresce até sumir) ── */
+  /* ── Saída: zoom cresce até sumir ── */
   function animarSaida(wrap, onFim) {
     wrap.querySelector('img').style.animationPlayState = 'paused';
     const inicio = performance.now();
     function frame(agora) {
       const t    = Math.min((agora - inicio) / SAIDA_MS, 1);
       const prog = ease(t);
-      const sc   = 1 + prog * 2.8;
-      wrap.style.transform = `translate(-50%, -50%) scale(${sc})`;
+      wrap.style.transform = `translate(-50%, -50%) scale(${1 + prog * 2.8})`;
       wrap.style.opacity   = String(1 - prog);
       if (t < 1) requestAnimationFrame(frame);
       else {
-        wrap.style.display = 'none';
+        wrap.style.display   = 'none';
         wrap.style.transform = 'translate(-50%, -50%)';
         wrap.style.opacity   = '1';
         wrap.querySelector('img').style.animationPlayState = 'running';
@@ -440,11 +397,11 @@ function initConvite() {
     requestAnimationFrame(frame);
   }
 
-  /* ── Cria botões hotspot ── */
+  /* ── Botões hotspot ── */
   function criarBotoes(botoes) {
     camadaBotoes.innerHTML = '';
     botoes.forEach(cfg => {
-      const a = document.createElement('a');
+      const a       = document.createElement('a');
       a.className   = 'hotspot-btn';
       a.href        = cfg.url;
       a.target      = '_blank';
@@ -454,7 +411,6 @@ function initConvite() {
       a.style.width  = cfg.w;
       a.style.height = cfg.h;
       camadaBotoes.appendChild(a);
-      // Fade-in suave
       setTimeout(() => { a.style.display = 'flex'; }, 400);
     });
   }
@@ -462,23 +418,17 @@ function initConvite() {
   /* ── Mostrar cena ── */
   function mostrarCena(idx) {
     const cena = CENAS[idx];
-    cenaIdx    = idx;
-
-    // Limpa elementos antigos
     camadaElem.innerHTML   = '';
     camadaBotoes.innerHTML = '';
 
-    // Cria e anima elementos com stagger
     cena.elementos.forEach((cfg, i) => {
       const wrap = criarElem(cfg);
       camadaElem.appendChild(wrap);
       setTimeout(() => animarEntrada(wrap), i * STAGGER_MS);
     });
 
-    // Botões se for cena final
     if (cena.final && cena.botoes) criarBotoes(cena.botoes);
 
-    // Agenda próxima cena
     clearTimeout(timer);
     if (!cena.final) {
       timer = setTimeout(() => trocarCena(idx + 1), TEMPO_CENA_MS);
@@ -486,7 +436,7 @@ function initConvite() {
     emAnimacao = false;
   }
 
-  /* ── Troca de cena: saída em zoom → mostrar próxima ── */
+  /* ── Trocar cena ── */
   function trocarCena(idx) {
     if (emAnimacao) return;
     emAnimacao = true;
@@ -497,7 +447,6 @@ function initConvite() {
 
     let done = 0;
     wraps.forEach((w, i) => {
-      // Stagger na saída também
       setTimeout(() => {
         animarSaida(w, () => {
           done++;
@@ -511,33 +460,22 @@ function initConvite() {
   capa.addEventListener('click', () => {
     capa.classList.add('fechando');
     fundoVideo.play().catch(() => {});
-    audio.volume = 0;
-    audio.play().catch(() => {});
-    // Fade-in do áudio
-    let vol = 0;
-    const ivl = setInterval(() => {
-      vol = Math.min(vol + 0.04, 0.85);
-      audio.volume = vol;
-      if (vol >= 0.85) clearInterval(ivl);
-    }, 80);
-
+    iniciarAudio();
     btnSom.style.display = 'flex';
+    btnSom.textContent   = '🔊';
     setTimeout(() => {
       capa.style.display = 'none';
       mostrarCena(0);
     }, 800);
   });
 
-  /* ── Botão de som ── */
-  let mutado = false;
+  /* ── Botão som ── */
   btnSom.addEventListener('click', () => {
-    mutado = !mutado;
+    mutado       = !mutado;
     audio.muted  = mutado;
     btnSom.textContent = mutado ? '🔇' : '🔊';
   });
-  btnSom.textContent = '🔊';
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    PAINEL DE MAPEAMENTO
@@ -556,10 +494,9 @@ function initMapa() {
   const btnCopiar     = document.getElementById('btn-copiar');
   const msgCopiado    = document.getElementById('msg-copiado');
 
-  let base64Atual = null;
+  let base64Atual    = null;
   let mediaTypeAtual = 'image/jpeg';
 
-  /* ── Upload de imagem ── */
   areaUpload.addEventListener('click', () => inputImg.click());
   areaUpload.addEventListener('dragover', e => e.preventDefault());
   areaUpload.addEventListener('drop', e => {
@@ -573,56 +510,42 @@ function initMapa() {
 
   function carregarImagem(file) {
     mediaTypeAtual = file.type || 'image/jpeg';
-    const reader = new FileReader();
-    reader.onload = e => {
-      base64Atual = e.target.result.split(',')[1];
-      imgPreview.src = e.target.result;
+    const reader   = new FileReader();
+    reader.onload  = e => {
+      base64Atual               = e.target.result.split(',')[1];
+      imgPreview.src            = e.target.result;
       previewCont.style.display = 'block';
       overlayMarcad.innerHTML   = '';
       blocoJson.style.display   = 'none';
-      statusMapa.textContent    = '✅ Imagem carregada. Agora clique em Analisar.';
+      statusMapa.textContent    = '✅ Imagem carregada. Clique em Analisar.';
     };
     reader.readAsDataURL(file);
   }
 
-  /* ── Analisar com Claude API ── */
   btnAnalisar.addEventListener('click', async () => {
-    if (!base64Atual) {
-      statusMapa.textContent = '⚠️ Suba uma imagem primeiro.';
-      return;
-    }
+    if (!base64Atual) { statusMapa.textContent = '⚠️ Suba uma imagem primeiro.'; return; }
+    if (!inputElem.value.trim()) { statusMapa.textContent = '⚠️ Liste os nomes dos arquivos.'; return; }
 
-    const listaNomes = inputElem.value.trim();
-    if (!listaNomes) {
-      statusMapa.textContent = '⚠️ Liste os nomes dos arquivos.';
-      return;
-    }
-
-    btnAnalisar.disabled   = true;
-    statusMapa.textContent = '🤖 Claude está analisando a imagem...';
+    btnAnalisar.disabled    = true;
+    statusMapa.textContent  = '🤖 Claude está analisando a imagem...';
     overlayMarcad.innerHTML = '';
     blocoJson.style.display = 'none';
 
     const prompt = `Você é um assistente de posicionamento para convites digitais.
 
 Analise esta imagem de referência. O usuário quer posicionar estes arquivos/elementos:
-${listaNomes}
+${inputElem.value.trim()}
 
-Para CADA elemento listado, identifique onde ele aparece na imagem (ou onde seria o local mais adequado) e retorne as coordenadas em porcentagem relativa à imagem:
-- x: 0% = borda esquerda, 100% = borda direita (centro do elemento)
-- y: 0% = topo, 100% = fundo (centro do elemento)
+Para CADA elemento listado, identifique onde ele aparece na imagem e retorne coordenadas em porcentagem:
+- x: 0%=esquerda 100%=direita (centro do elemento)
+- y: 0%=topo 100%=fundo (centro do elemento)
 - w: largura sugerida em vw (ex: "18vw")
-- de: direção de entrada sugerida: "left", "right", "top" ou "bottom"
-- tipo: "elemento" para gifs/pngs decorativos, ou "hotspot" para botões clicáveis
-- Se for hotspot, adicione: h: altura sugerida (ex: "52px")
+- de: direção de entrada: "left", "right", "top" ou "bottom"
+- tipo: "elemento" para gifs/pngs, "hotspot" para botões clicáveis
+- Se hotspot: inclua h (ex: "52px"), label (texto) e url
 
-Retorne SOMENTE JSON válido, sem markdown, sem explicação:
-{
-  "elementos": [
-    { "nome": "arquivo.gif", "x": "XX%", "y": "YY%", "w": "18vw", "de": "left", "tipo": "elemento" },
-    { "nome": "botao.png",   "x": "50%", "y": "55%", "w": "65%",  "h": "52px", "de": "bottom", "tipo": "hotspot", "label": "Texto do botão", "url": "https://" }
-  ]
-}`;
+Retorne SOMENTE JSON válido sem markdown:
+{"elementos":[{"nome":"arquivo.gif","x":"XX%","y":"YY%","w":"18vw","de":"left","tipo":"elemento"}]}`;
 
     try {
       const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -631,89 +554,69 @@ Retorne SOMENTE JSON válido, sem markdown, sem explicação:
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaTypeAtual, data: base64Atual } },
-              { type: 'text',  text: prompt }
-            ]
-          }]
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaTypeAtual, data: base64Atual } },
+            { type: 'text',  text: prompt }
+          ]}]
         })
       });
 
       if (!resp.ok) throw new Error(`API ${resp.status}`);
-      const data = await resp.json();
-      const texto = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
-
-      // Extrai JSON da resposta
+      const data    = await resp.json();
+      const texto   = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
       const jsonStr = texto.replace(/```json|```/g, '').trim();
-      const resultado = JSON.parse(jsonStr);
+      const result  = JSON.parse(jsonStr);
 
-      mostrarMarcadores(resultado.elementos);
-      gerarJSON(resultado.elementos);
-      statusMapa.textContent = `✅ ${resultado.elementos.length} elemento(s) mapeado(s)!`;
-
+      mostrarMarcadores(result.elementos);
+      gerarJSON(result.elementos);
+      statusMapa.textContent = `✅ ${result.elementos.length} elemento(s) mapeado(s)!`;
     } catch (err) {
       statusMapa.textContent = '❌ Erro: ' + err.message;
-      console.error(err);
     } finally {
       btnAnalisar.disabled = false;
     }
   });
 
-  /* ── Mostra marcadores sobre a imagem ── */
   function mostrarMarcadores(elementos) {
     overlayMarcad.innerHTML = '';
-    const rect = imgPreview.getBoundingClientRect();
-
-    elementos.forEach((el, i) => {
-      const dot = document.createElement('div');
-      dot.className    = 'marcador';
-      dot.style.left   = el.x;
-      dot.style.top    = el.y;
+    elementos.forEach(el => {
+      const dot            = document.createElement('div');
+      dot.className        = 'marcador';
+      dot.style.left       = el.x;
+      dot.style.top        = el.y;
       dot.style.background = el.tipo === 'hotspot' ? '#f472b6' : '#a78bfa';
-      dot.title        = el.nome;
-
-      const label = document.createElement('div');
-      label.className  = 'marcador-label';
-      label.textContent = el.nome;
-      dot.appendChild(label);
-
+      dot.title            = el.nome;
+      const lbl            = document.createElement('div');
+      lbl.className        = 'marcador-label';
+      lbl.textContent      = el.nome;
+      dot.appendChild(lbl);
       overlayMarcad.appendChild(dot);
     });
   }
 
-  /* ── Gera JSON formatado para copiar ── */
   function gerarJSON(elementos) {
     const elems  = elementos.filter(e => e.tipo !== 'hotspot');
     const botoes = elementos.filter(e => e.tipo === 'hotspot');
-
-    const obj = {
-      elementos: elems.map(e => ({
-        src: e.nome, x: e.x, y: e.y, w: e.w, de: e.de
-      }))
+    const obj    = {
+      elementos: elems.map(e => ({ src: e.nome, x: e.x, y: e.y, w: e.w, de: e.de }))
     };
-
     if (botoes.length > 0) {
       obj.final  = true;
       obj.botoes = botoes.map(b => ({
-        label: b.label || b.nome.replace(/\.(png|gif|jpg)/i, ''),
+        label: b.label || b.nome.replace(/\.(png|gif|jpg)/i,''),
         url:   b.url || 'https://',
         x: b.x, y: b.y, w: b.w, h: b.h || '52px'
       }));
     }
-
-    jsonOutput.textContent = JSON.stringify(obj, null, 2);
+    jsonOutput.textContent  = JSON.stringify(obj, null, 2);
     blocoJson.style.display = 'block';
   }
 
-  /* ── Copiar JSON ── */
   btnCopiar.addEventListener('click', () => {
     navigator.clipboard.writeText(jsonOutput.textContent).then(() => {
       msgCopiado.textContent = '✅ Copiado! Cole na seção CENAS do convite.';
       setTimeout(() => msgCopiado.textContent = '', 3000);
     }).catch(() => {
-      // fallback
       const ta = document.createElement('textarea');
       ta.value = jsonOutput.textContent;
       document.body.appendChild(ta);
