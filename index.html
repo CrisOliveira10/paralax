@@ -5,181 +5,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convite Especial - Fundo do Mar</title>
     <style>
-        :root { 
-            --tempo-cena: 6s; 
-            --largura-botao: 220px; /* Tamanho fixo para botões iguais */
+        :root {
+            --tempo-cena: 6000;
+            --largura-botao: 220px;
         }
-        
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #000; }
 
-        #convite-container { position: relative; width: 100vw; height: 100vh; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; font-family: 'Arial', sans-serif; background: #000;
+        }
 
+        #convite-container {
+            position: relative; width: 100vw; height: 100vh; overflow: hidden;
+        }
+
+        /* ── CENAS ─────────────────────────────────────────────────────
+           Estado padrão: fora da tela à direita, invisível.
+           .ativa   → no lugar, visível.
+           .saindo  → saindo para a esquerda.
+        ──────────────────────────────────────────────────────────────── */
         .cena {
             position: absolute; width: 100%; height: 100%;
-            opacity: 0; transition: opacity 1.5s ease-in-out;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-            visibility: hidden; /* Evita cliques em cenas invisíveis */
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 1.1s ease-in-out, transform 1.1s cubic-bezier(0.76,0,0.24,1);
+            visibility: hidden;
+            z-index: 1;
         }
-        .cena.ativa { opacity: 1; z-index: 10; visibility: visible; }
+        .cena.ativa {
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+            z-index: 10;
+        }
+        .cena.saindo {
+            opacity: 0;
+            transform: translateX(-60%); /* parallax: sai menos do que entra */
+            visibility: visible;
+            z-index: 5;
+            pointer-events: none;
+        }
 
+        /* ── VÍDEO DE FUNDO ─────────────────────────────────────────── */
         .bg-video {
             position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; object-fit: cover; z-index: -1;
+            width: 100%; height: 100%;
+            object-fit: cover; z-index: -1;
         }
 
-        /* Efeito de Flutuação Diferenciada (Parallax Simples) */
+        /* ── GIFs FLUTUANTES ────────────────────────────────────────── */
         .personagem-gif {
-            position: absolute;
-            z-index: 15;
+            position: absolute; z-index: 15;
             animation: flutuar 4s ease-in-out infinite alternate;
         }
-        .personagem-gif:nth-child(even) { animation-duration: 6s; animation-delay: 1s; }
-
+        .personagem-gif:nth-child(even) {
+            animation-duration: 6s; animation-delay: 1s;
+        }
         @keyframes flutuar {
             from { transform: translateY(0px) rotate(-3deg); }
-            to { transform: translateY(-30px) rotate(3deg); }
+            to   { transform: translateY(-30px) rotate(3deg); }
         }
 
+        /* ── TEXTO ──────────────────────────────────────────────────── */
         .texto-cena {
-            color: white; font-size: 2.2rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
+            color: white; font-size: 2.2rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
             z-index: 20; padding: 20px; max-width: 85%;
         }
 
-        /* --- HOTSPOTS (BOTÕES FINAIS) --- */
+        /* ── BOTÕES FINAIS (HOTSPOTS) ───────────────────────────────── */
         .botoes-finais {
-            display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 15px; margin-top: 20px;
         }
-
         .botoes-finais a {
             display: flex; align-items: center; justify-content: center;
-            width: var(--largura-botao); height: 55px; /* Tamanho padrão */
-            background: transparent; /* Invisível por padrão */
-            color: transparent; /* Texto invisível para ser usado apenas como área de clique */
+            width: var(--largura-botao); height: 55px;
+            background: transparent; color: transparent;
             text-decoration: none; border-radius: 10px;
             font-weight: bold; transition: 0.3s;
             border: 2px solid transparent;
         }
-
-        /* MODO EDIÇÃO: Ative adicionando a classe 'debug-mode' na tag <body> */
+        /* MODO EDIÇÃO: adicione a classe 'debug-mode' na tag <body> para visualizar os botões */
         .debug-mode .botoes-finais a {
-            background: rgba(255, 105, 180, 0.4); 
+            background: rgba(255,105,180,0.4);
             border: 2px dashed #ff69b4;
-            color: white;
-            font-size: 12px;
+            color: white; font-size: 12px;
         }
 
-        #capa { 
-            background: url('capa.jpg') no-repeat center center; background-size: cover;
-            cursor: pointer; z-index: 1000; opacity: 1; visibility: visible;
+        /* ── CAPA ───────────────────────────────────────────────────── */
+        #capa {
+            background: url('capa.jpg') no-repeat center center / cover;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0); /* capa começa no lugar */
+            transition: opacity 0.8s ease;
         }
-        
+        #capa.fechando {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ── BOTÃO SOM ──────────────────────────────────────────────── */
         #controle-som {
             position: fixed; top: 20px; left: 20px; z-index: 1100;
             background: rgba(255,255,255,0.5); border: none; border-radius: 50%;
-            width: 45px; height: 45px; cursor: pointer;
+            width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem;
         }
     </style>
 </head>
-<body class="debug-mode">
+<body>
 
     <button id="controle-som">🔇</button>
     <audio id="musica-fundo" loop src="audio.mp3"></audio>
 
     <div id="convite-container">
-        <div id="capa" class="cena ativa" onclick="iniciarConvite()">
+        <div id="capa" class="cena">
             <h1 class="texto-cena">Clique para abrir o Convite Especial 🌊</h1>
         </div>
     </div>
 
     <script>
         const dadosCenas = [
-            { texto: "Junte-se a nós em uma aventura!", video: "cena1.mp4", gifs: ["polvo.gif"], posGifs: ["top:20%; left:10%"] },
-            { texto: "Sabrina faz 1 aninho!", video: "cena2.mp4", gifs: ["peixe.gif"], posGifs: ["bottom:15%; right:10%"] },
-            { texto: "Venha celebrar com a gente!", video: "cena3.mp4", gifs: ["baleia.gif"], posGifs: ["top:40%; left:30%"] },
-            { 
-                texto: "Esperamos por você!", 
-                video: "final.mp4", 
-                gifs: [], 
+            {
+                texto: "Junte-se a nós em uma aventura!",
+                video: "cena1.mp4",
+                gifs: ["polvo.gif"],
+                posGifs: ["top:20%; left:10%"]
+            },
+            {
+                texto: "Sabrina faz 1 aninho!",
+                video: "cena2.mp4",
+                gifs: ["peixe.gif"],
+                posGifs: ["bottom:15%; right:10%"]
+            },
+            {
+                texto: "Venha celebrar com a gente!",
+                video: "cena3.mp4",
+                gifs: ["baleia.gif"],
+                posGifs: ["top:40%; left:30%"]
+            },
+            {
+                texto: "Esperamos por você!",
+                video: "final.mp4",
+                gifs: [],
                 links: [
                     { label: "CONFIRMAR", url: "https://wa.me/5571993233142" },
-                    { label: "MAPA", url: "https://maps.google.com" }
-                ] 
+                    { label: "MAPA",      url: "https://maps.google.com" }
+                ]
             }
         ];
 
-        const container = document.getElementById('convite-container');
-        const audio = document.getElementById('musica-fundo');
-        const btnSom = document.getElementById('controle-som');
-        let cenaAtual = 0;
+        const TEMPO_CENA_MS = 6000; // ✏️ duração de cada cena em ms
 
-        // Gerar Cenas Dinamicamente
+        const container = document.getElementById('convite-container');
+        const audio     = document.getElementById('musica-fundo');
+        const btnSom    = document.getElementById('controle-som');
+        const capa      = document.getElementById('capa');
+        let cenaAtual   = 0;
+        let timer       = null;
+
+        /* ── Gerar cenas dinamicamente ─────────────────────────────── */
         dadosCenas.forEach((dados, index) => {
             const divCena = document.createElement('div');
             divCena.className = 'cena';
             divCena.id = `cena-${index + 1}`;
 
-            let htmlGifs = '';
-            dados.gifs.forEach((gif, i) => {
-                htmlGifs += `<img src="${gif}" class="personagem-gif" style="${dados.posGifs[i]}">`;
-            });
+            const htmlGifs = dados.gifs.map((gif, i) =>
+                `<img src="${gif}" class="personagem-gif" style="${dados.posGifs[i]}">`
+            ).join('');
 
-            let htmlBotoes = '';
-            if(dados.links) {
-                htmlBotoes = `<div class="botoes-finais">` + 
-                    dados.links.map(l => `<a href="${l.url}" target="_blank">${l.label}</a>`).join('') + 
-                    `</div>`;
-            }
+            const htmlBotoes = dados.links
+                ? `<div class="botoes-finais">` +
+                  dados.links.map(l =>
+                    `<a href="${l.url}" target="_blank">${l.label}</a>`
+                  ).join('') +
+                  `</div>`
+                : '';
 
             divCena.innerHTML = `
                 <video class="bg-video" loop muted playsinline>
                     <source src="${dados.video}" type="video/mp4">
                 </video>
-                <div class="texto-cena">${dados.texto} ${htmlBotoes}</div>
+                <div class="texto-cena">${dados.texto}${htmlBotoes}</div>
                 ${htmlGifs}
             `;
             container.appendChild(divCena);
         });
 
-        function iniciarConvite() {
-            document.getElementById('capa').classList.remove('ativa');
-            audio.play().catch(() => console.log("Áudio aguardando interação"));
-            btnSom.innerText = "🔊";
-            
-            // Pequeno delay para garantir a transição suave da capa
-            setTimeout(proximaCena, 500);
-        }
+        /* ── Transição parallax entre cenas ────────────────────────── */
+        function mostrarCena(index) {
+            const total = dadosCenas.length;
+            if (index > total) return;
 
-        function proximaCena() {
-            const totalCenas = dadosCenas.length;
-            
-            // Remove 'ativa' de todas as cenas antes de mostrar a próxima
-            document.querySelectorAll('.cena').forEach(c => {
-                c.classList.remove('ativa');
-                const v = c.querySelector('video');
-                if(v) v.pause();
-            });
-
-            if (cenaAtual < totalCenas) {
-                cenaAtual++;
-                const cenaElemento = document.getElementById(`cena-${cenaAtual}`);
-                
-                if (cenaElemento) {
-                    cenaElemento.classList.add('ativa');
-                    const video = cenaElemento.querySelector('video');
-                    if(video) video.play();
-
-                    // Só agenda a próxima se não for a última
-                    if (cenaAtual < totalCenas) {
-                        setTimeout(proximaCena, 6000);
-                    }
-                }
+            // Para e marca saindo a cena anterior
+            const anterior = container.querySelector('.cena.ativa:not(#capa)');
+            if (anterior) {
+                anterior.classList.remove('ativa');
+                anterior.classList.add('saindo');
+                const vAnterior = anterior.querySelector('video');
+                if (vAnterior) vAnterior.pause();
+                // Limpa classe saindo após a transição
+                setTimeout(() => anterior.classList.remove('saindo'), 1200);
             }
+
+            const proxima = document.getElementById(`cena-${index}`);
+            if (!proxima) return;
+
+            proxima.classList.add('ativa');
+            const v = proxima.querySelector('video');
+            if (v) v.play().catch(() => {});
+
+            clearTimeout(timer);
+            // Só avança automaticamente se não for a última cena
+            if (index < total) {
+                timer = setTimeout(() => mostrarCena(index + 1), TEMPO_CENA_MS);
+            }
+
+            cenaAtual = index;
         }
 
-        btnSom.onclick = () => {
-            if (audio.paused) { audio.play(); btnSom.innerText = "🔊"; }
-            else { audio.pause(); btnSom.innerText = "🔇"; }
-        };
+        /* ── Iniciar ao clicar na capa ─────────────────────────────── */
+        capa.addEventListener('click', () => {
+            capa.classList.add('fechando');
+            audio.play().catch(() => {});
+            btnSom.innerText = '🔊';
+            setTimeout(() => {
+                capa.style.display = 'none';
+                mostrarCena(1);
+            }, 800);
+        });
+
+        /* ── Controle de som ───────────────────────────────────────── */
+        btnSom.addEventListener('click', () => {
+            if (audio.paused) { audio.play(); btnSom.innerText = '🔊'; }
+            else              { audio.pause(); btnSom.innerText = '🔇'; }
+        });
     </script>
+
+    <style>
+  #skip-btn {
+    position:fixed; bottom:calc(28px + env(safe-area-inset-bottom,0px)); right:calc(20px + env(safe-area-inset-right,0px));
+    z-index:40; height:46px; padding:0 18px; border-radius:23px;
+    border:1.5px solid rgba(201,169,110,.45); background:rgba(8,8,8,.65);
+    color:var(--gold-light); display:none; align-items:center; justify-content:center;
+    cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    font-family:'Cinzel',serif; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    transition:transform .1s; -webkit-tap-highlight-color:transparent;
+  }
+  #skip-btn:active { transform:scale(.88); }
+</style>
+
+<button id="skip-btn">Pular</button>
+
+<script>
+  // ✏️ EDITE AQUI — coloque o nome da página final
+  const PAGINA_FINAL = 'pagina.jpg';
+
+  const skipBtn = document.getElementById('skip-btn');
+  overlay.addEventListener('click', () => { skipBtn.style.display = 'flex'; });
+  skipBtn.addEventListener('click', () => {
+    cancelAnimationFrame(kbRafId);
+    clearTimeout(sceneTimer);
+    document.getElementById('final-page').querySelector('.bg-img').src = PAGINA_FINAL;
+    showFinalPage();
+    skipBtn.style.display = 'none';
+  });
+</script>
 </body>
 </html>
